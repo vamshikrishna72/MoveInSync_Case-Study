@@ -1,0 +1,16 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!target/classes/com/vamshi/smartroute/TestRunner.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Operating System
+.DS_Store
+Thumbs.db
+*.log
