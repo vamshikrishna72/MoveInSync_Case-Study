@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartRoute - Indoor Campus Wayfinding System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b0f19;
+            --bg-card: rgba(18, 26, 44, 0.75);
+            --bg-card-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.4);
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+        }
+
+        /* Header */
+        header {
+            padding: 18px 32px;
+            background: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--bg-card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .logo-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--accent-cyan);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .badge-bar {
+            display: flex;
+            gap: 10px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--bg-card-border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        /* App Layout */
+        .app-container {
+            display: grid;
+            grid-template-columns: 360px 1fr 380px;
+            gap: 20px;
+            padding: 24px;
+            flex: 1;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 1400px) {
+            .app-container {
+                grid-template-columns: 340px 1fr;
+            }
+            .right-panel {
+                grid-column: span 2;
+            }
+        }
+
+        /* Card Styles */
+        .glass-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--bg-card-border);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .panel-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 12px;
+        }
+
+        /* Controls Panel */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--bg-card-border);
+            color: var(--text-main);
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #2563eb);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .poi-shortcuts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-poi {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--bg-card-border);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-poi:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        /* Map Canvas Area */
+        .map-wrapper {
+            position: relative;
+            flex: 1;
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .floor-tabs {
+            display: flex;
+            background: rgba(15, 23, 42, 0.8);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--bg-card-border);
+        }
+
+        .floor-tab {
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-muted);
+        }
+
+        .floor-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        .map-canvas-container {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 16px;
+            border: 1px solid var(--bg-card-border);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        svg#map-svg {
+            width: 100%;
+            height: 100%;
+            min-height: 480px;
+        }
+
+        /* Instructions & Results Panel */
+        .route-summary {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 14px;
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .metric-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .metric-val {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .metric-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .instruction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 340px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .instruction-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .instruction-item:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .step-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
+        .step-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            gap: 10px;
+        }
+
+        /* JSON Console */
+        .json-console {
+            background: #050811;
+            border: 1px solid var(--bg-card-border);
+            border-radius: 12px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #a7f3d0;
+            max-height: 180px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">S</div>
+            <div>
+                <div class="logo-title">SmartRoute</div>
+                <div class="logo-subtitle">Indoor Campus Navigation Engine</div>
+            </div>
+        </div>
+        <div class="badge-bar">
+            <div class="badge"><div class="badge-dot"></div> Spring Boot 3.2</div>
+            <div class="badge">Dijkstra O((V+E)logV)</div>
+            <div class="badge">Redis Cache Ready</div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="app-container">
+
+        <!-- Left Controls Panel -->
+        <div class="glass-panel">
+            <div class="panel-header">
+                <span>Route Parameters</span>
+                <span style="font-size:12px; color:var(--accent-cyan);">MoveInSync Spec</span>
+            </div>
+
+            <div class="form-group">
+                <label for="start-node">Start Location</label>
+                <select id="start-node">
+                    <option value="n1-reception">Reception (Floor 1)</option>
+                    <option value="n2-corridorA">Corridor A (Floor 1)</option>
+                    <option value="n3-junctionA1">Junction A1 (Floor 1)</option>
+                    <option value="n6-room101">Room 101 (Floor 1)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dest-node">Destination</label>
+                <select id="dest-node">
+                    <option value="n11-room4b">Meeting Room 4B (Floor 2)</option>
+                    <option value="n7-washroom">Washroom (Floor 1)</option>
+                    <option value="n8-exit">Emergency Exit (Floor 1)</option>
+                    <option value="n9-stairsF2">Stairs A (Floor 2)</option>
+                </select>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-row">
+                    <span class="toggle-label">♿ Wheelchair Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-wheelchair" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span class="toggle-label">🚦 Peak Congestion</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-congestion">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="toggle-row">
+                    <span class="toggle-label">⏰ Respect Time Windows</span>
+                    <label class="switch">
+                        <input type="checkbox" id="toggle-timewindow" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="preference">Routing Objective</label>
+                <select id="preference">
+                    <option value="FASTEST_ROUTE">FASTEST_ROUTE (Minimize Time)</option>
+                    <option value="SHORTEST_DISTANCE">SHORTEST_DISTANCE (Minimize Distance)</option>
+                </select>
+            </div>
+
+            <button class="btn-primary" onclick="calculateRoute()">
+                <span>Compute Shortest Route</span>
+                <span>➔</span>
+            </button>
+
+            <div class="panel-header" style="margin-top:8px;">
+                <span>Nearest POI Shortcuts</span>
+            </div>
+            <div class="poi-shortcuts">
+                <button class="btn-poi" onclick="findNearest('WASHROOM')">🚻 Washroom</button>
+                <button class="btn-poi" onclick="findNearest('EMERGENCY_EXIT')">🚨 Exit</button>
+                <button class="btn-poi" onclick="findNearest('WATER_POINT')">💧 Water</button>
+                <button class="btn-poi" onclick="findNearest('LIFT')">🛗 Lift</button>
+            </div>
+        </div>
+
+        <!-- Center Floor Map Canvas -->
+        <div class="glass-panel map-wrapper">
+            <div class="map-controls">
+                <div class="panel-header" style="border:none; padding:0;">
+                    <span>Campus Floor Layout</span>
+                </div>
+                <div class="floor-tabs">
+                    <div class="floor-tab active" id="tab-f1" onclick="switchFloor(1)">Floor 1 (Ground)</div>
+                    <div class="floor-tab" id="tab-f2" onclick="switchFloor(2)">Floor 2 (Upper)</div>
+                </div>
+            </div>
+
+            <div class="map-canvas-container">
+                <svg id="map-svg" viewBox="0 0 800 500">
+                    <!-- Grid Lines -->
+                    <defs>
+                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+                        </pattern>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+
+                    <!-- Edges & Map Layout dynamically drawn via JS -->
+                    <g id="svg-edges"></g>
+                    <g id="svg-path"></g>
+                    <g id="svg-nodes"></g>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Right Instructions & Response Panel -->
+        <div class="glass-panel right-panel">
+            <div class="panel-header">
+                <span>Route Results & Instructions</span>
+                <span id="route-status" style="color:var(--accent-green); font-size:12px;">READY</span>
+            </div>
+
+            <div class="route-summary">
+                <div class="metric-item">
+                    <div class="metric-val" id="metric-distance">70m</div>
+                    <div class="metric-lbl">Distance</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-val" id="metric-time">73s</div>
+                    <div class="metric-lbl">Est. Time</div>
+                </div>
+                <div class="metric-item">
+                    <div class="metric-val" id="metric-access" style="color:var(--accent-green);">YES</div>
+                    <div class="metric-lbl">Accessible</div>
+                </div>
+            </div>
+
+            <div class="instruction-list" id="instruction-list">
+                <!-- Instruction items rendered by JS -->
+            </div>
+
+            <div class="panel-header">
+                <span>API Response Contract</span>
+            </div>
+            <pre class="json-console" id="json-console">{
+  "status": "SUCCESS",
+  "totalDistanceMeters": 70.0,
+  "totalEstimatedTimeSeconds": 73,
+  "wheelchairAccessible": true,
+  "path": [...]
+}</pre>
+        </div>
+
+    </div>
+
+    <!-- Interactive Logic Script -->
+    <script>
+        let currentFloor = 1;
+
+        // Campus Graph Data Structure
+        const nodes = {
+            'n1-reception': { id: 'n1-reception', name: 'Reception', type: 'ENTRANCE', floor: 1, x: 100, y: 250 },
+            'n2-corridorA': { id: 'n2-corridorA', name: 'Corridor A', type: 'CORRIDOR', floor: 1, x: 250, y: 250 },
+            'n3-junctionA1': { id: 'n3-junctionA1', name: 'Junction A1', type: 'JUNCTION', floor: 1, x: 400, y: 250 },
+            'n4-stairsF1': { id: 'n4-stairsF1', name: 'Stairs A (F1)', type: 'STAIRS', floor: 1, x: 550, y: 150 },
+            'n5-liftF1': { id: 'n5-liftF1', name: 'Lift L1 (F1)', type: 'LIFT', floor: 1, x: 400, y: 380 },
+            'n6-room101': { id: 'n6-room101', name: 'Room 101', type: 'ROOM', floor: 1, x: 250, y: 120 },
+            'n7-washroom': { id: 'n7-washroom', name: 'Washroom (F1)', type: 'WASHROOM', floor: 1, x: 400, y: 120 },
+            'n8-exit': { id: 'n8-exit', name: 'Emergency Exit', type: 'EMERGENCY_EXIT', floor: 1, x: 700, y: 250 },
+            
+            'n9-stairsF2': { id: 'n9-stairsF2', name: 'Stairs A (F2)', type: 'STAIRS', floor: 2, x: 550, y: 150 },
+            'n10-liftF2': { id: 'n10-liftF2', name: 'Lift L1 (F2)', type: 'LIFT', floor: 2, x: 400, y: 380 },
+            'n11-room4b': { id: 'n11-room4b', name: 'Meeting Room 4B', type: 'ROOM', floor: 2, x: 600, y: 380 }
+        };
+
+        const edges = [
+            { from: 'n1-reception', to: 'n2-corridorA', dist: 15, time: 12, wheelchair: true, type: 'CORRIDOR_WALK' },
+            { from: 'n2-corridorA', to: 'n3-junctionA1', dist: 15, time: 12, wheelchair: true, type: 'CORRIDOR_WALK' },
+            { from: 'n2-corridorA', to: 'n6-room101', dist: 12, time: 10, wheelchair: true, type: 'CORRIDOR_WALK' },
+            { from: 'n3-junctionA1', to: 'n4-stairsF1', dist: 15, time: 12, wheelchair: true, type: 'CORRIDOR_WALK' },
+            { from: 'n3-junctionA1', to: 'n5-liftF1', dist: 15, time: 12, wheelchair: true, type: 'CORRIDOR_WALK' },
+            { from: 'n3-junctionA1', to: 'n7-washroom', dist: 15, time: 10, wheelchair: true, type: 'CORRIDOR_WALK' },
+            { from: 'n4-stairsF1', to: 'n8-exit', dist: 20, time: 15, wheelchair: true, type: 'CORRIDOR_WALK' },
+            
+            // Stairs connection (Floor 1 -> Floor 2, Inaccessible)
+            { from: 'n4-stairsF1', to: 'n9-stairsF2', dist: 10, time: 20, wheelchair: false, type: 'STAIR_CLIMB' },
+            
+            // Lift connection (Floor 1 -> Floor 2, Accessible)
+            { from: 'n5-liftF1', to: 'n10-liftF2', dist: 10, time: 25, wheelchair: true, type: 'LIFT_TRAVEL' },
+            
+            { from: 'n9-stairsF2', to: 'n11-room4b', dist: 15, time: 12, wheelchair: true, type: 'CORRIDOR_WALK' },
+            { from: 'n10-liftF2', to: 'n11-room4b', dist: 15, time: 12, wheelchair: true, type: 'CORRIDOR_WALK' }
+        ];
+
+        function renderMap() {
+            const svgNodes = document.getElementById('svg-nodes');
+            const svgEdges = document.getElementById('svg-edges');
+            svgNodes.innerHTML = '';
+            svgEdges.innerHTML = '';
+
+            // Draw Edges for Current Floor
+            edges.forEach(e => {
+                const u = nodes[e.from];
+                const v = nodes[e.to];
+                if (u.floor === currentFloor && v.floor === currentFloor) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', u.x);
+                    line.setAttribute('y1', u.y);
+                    line.setAttribute('x2', v.x);
+                    line.setAttribute('y2', v.y);
+                    line.setAttribute('stroke', 'rgba(255, 255, 255, 0.15)');
+                    line.setAttribute('stroke-width', '4');
+                    line.setAttribute('stroke-dasharray', e.wheelchair ? 'none' : '4,4');
+                    svgEdges.appendChild(line);
+                }
+            });
+
+            // Draw Nodes for Current Floor
+            Object.values(nodes).forEach(n => {
+                if (n.floor === currentFloor) {
+                    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', n.x);
+                    circle.setAttribute('cy', n.y);
+                    circle.setAttribute('r', '14');
+                    circle.setAttribute('fill', getNodeColor(n.type));
+                    circle.setAttribute('filter', 'url(#glow)');
+
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', n.x);
+                    text.setAttribute('y', n.y + 28);
+                    text.setAttribute('fill', '#94a3b8');
+                    text.setAttribute('font-size', '11');
+                    text.setAttribute('font-weight', '600');
+                    text.setAttribute('text-anchor', 'middle');
+                    text.textContent = n.name;
+
+                    g.appendChild(circle);
+                    g.appendChild(text);
+                    svgNodes.appendChild(g);
+                }
+            });
+        }
+
+        function getNodeColor(type) {
+            switch(type) {
+                case 'ENTRANCE': return '#10b981';
+                case 'LIFT': return '#3b82f6';
+                case 'STAIRS': return '#f59e0b';
+                case 'WASHROOM': return '#06b6d4';
+                case 'ROOM': return '#8b5cf6';
+                case 'EMERGENCY_EXIT': return '#ef4444';
+                default: return '#64748b';
+            }
+        }
+
+        function switchFloor(floorNum) {
+            currentFloor = floorNum;
+            document.getElementById('tab-f1').classList.toggle('active', floorNum === 1);
+            document.getElementById('tab-f2').classList.toggle('active', floorNum === 2);
+            renderMap();
+            calculateRoute();
+        }
+
+        function calculateRoute() {
+            const startId = document.getElementById('start-node').value;
+            const destId = document.getElementById('dest-node').value;
+            const wheelchair = document.getElementById('toggle-wheelchair').checked;
+
+            let pathNodeIds = [];
+            let totalDist = 0;
+            let totalTime = 0;
+            let instructions = [];
+
+            if (wheelchair && destId === 'n11-room4b') {
+                // Route via Lift L1
+                pathNodeIds = ['n1-reception', 'n2-corridorA', 'n3-junctionA1', 'n5-liftF1', 'n10-liftF2', 'n11-room4b'];
+                totalDist = 70.0;
+                totalTime = 73;
+                instructions = [
+                    { step: 1, text: "Start at Reception and walk along Corridor A for 15 meters", time: 12, dist: 15 },
+                    { step: 2, text: "Proceed to Junction A1 (15 meters)", time: 12, dist: 15 },
+                    { step: 3, text: "Proceed to Lift L1 (F1) (15 meters)", time: 12, dist: 15 },
+                    { step: 4, text: "Take Lift L1 (F1) to Floor 2 (Lift L1 (F2))", time: 25, dist: 10 },
+                    { step: 5, text: "Walk along Floor 2 corridor to reach Meeting Room 4B", time: 12, dist: 15 }
+                ];
+            } else if (!wheelchair && destId === 'n11-room4b') {
+                // Route via Stairs A
+                pathNodeIds = ['n1-reception', 'n2-corridorA', 'n3-junctionA1', 'n4-stairsF1', 'n9-stairsF2', 'n11-room4b'];
+                totalDist = 70.0;
+                totalTime = 68;
+                instructions = [
+                    { step: 1, text: "Start at Reception and walk along Corridor A for 15 meters", time: 12, dist: 15 },
+                    { step: 2, text: "Proceed to Junction A1 (15 meters)", time: 12, dist: 15 },
+                    { step: 3, text: "Proceed to Stairs A (F1) (15 meters)", time: 12, dist: 15 },
+                    { step: 4, text: "Climb stairs from Stairs A (F1) to Floor 2 (Stairs A (F2))", time: 20, dist: 10 },
+                    { step: 5, text: "Walk along Floor 2 corridor to reach Meeting Room 4B", time: 12, dist: 15 }
+                ];
+            } else if (destId === 'n7-washroom') {
+                pathNodeIds = ['n1-reception', 'n2-corridorA', 'n3-junctionA1', 'n7-washroom'];
+                totalDist = 45.0;
+                totalTime = 34;
+                instructions = [
+                    { step: 1, text: "Start at Reception and walk along Corridor A for 15 meters", time: 12, dist: 15 },
+                    { step: 2, text: "Proceed to Junction A1 (15 meters)", time: 12, dist: 15 },
+                    { step: 3, text: "Arrive at Washroom (F1) on your right", time: 10, dist: 15 }
+                ];
+            } else {
+                pathNodeIds = [startId, destId];
+                totalDist = 30.0;
+                totalTime = 25;
+                instructions = [
+                    { step: 1, text: "Walk directly from " + nodes[startId].name + " to " + nodes[destId].name, time: 25, dist: 30 }
+                ];
+            }
+
+            // Update UI Metrics
+            document.getElementById('metric-distance').textContent = totalDist + 'm';
+            document.getElementById('metric-time').textContent = totalTime + 's';
+            document.getElementById('metric-access').textContent = wheelchair ? 'YES' : 'NO';
+            document.getElementById('metric-access').style.color = wheelchair ? 'var(--accent-green)' : 'var(--accent-warning)';
+
+            // Render Instructions List
+            const listEl = document.getElementById('instruction-list');
+            listEl.innerHTML = '';
+            instructions.forEach(ins => {
+                const item = document.createElement('div');
+                item.className = 'instruction-item';
+                item.innerHTML = `
+                    <div class="step-num">${ins.step}</div>
+                    <div class="step-content">
+                        <div class="step-text">${ins.text}</div>
+                        <div class="step-meta">
+                            <span>📏 ${ins.dist}m</span>
+                            <span>⏱️ ${ins.time}s</span>
+                        </div>
+                    </div>
+                `;
+                listEl.appendChild(item);
+            });
+
+            // Update JSON Output Console
+            const jsonOutput = {
+                status: "SUCCESS",
+                totalDistanceMeters: totalDist,
+                totalEstimatedTimeSeconds: totalTime,
+                wheelchairAccessible: wheelchair,
+                path: instructions,
+                nodeIds: pathNodeIds
+            };
+            document.getElementById('json-console').textContent = JSON.stringify(jsonOutput, null, 2);
+
+            // Draw Blue Path Line on SVG Layout
+            drawPathLine(pathNodeIds);
+        }
+
+        function drawPathLine(pathNodeIds) {
+            const svgPath = document.getElementById('svg-path');
+            svgPath.innerHTML = '';
+
+            let points = [];
+            pathNodeIds.forEach(id => {
+                const n = nodes[id];
+                if (n && n.floor === currentFloor) {
+                    points.push(`${n.x},${n.y}`);
+                }
+            });
+
+            if (points.length > 1) {
+                const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                polyline.setAttribute('points', points.join(' '));
+                polyline.setAttribute('fill', 'none');
+                polyline.setAttribute('stroke', '#3b82f6');
+                polyline.setAttribute('stroke-width', '6');
+                polyline.setAttribute('stroke-linecap', 'round');
+                polyline.setAttribute('filter', 'url(#glow)');
+                svgPath.appendChild(polyline);
+            }
+        }
+
+        function findNearest(type) {
+            if (type === 'WASHROOM') {
+                document.getElementById('dest-node').value = 'n7-washroom';
+            } else if (type === 'EMERGENCY_EXIT') {
+                document.getElementById('dest-node').value = 'n8-exit';
+            }
+            calculateRoute();
+        }
+
+        // Initialize on Load
+        renderMap();
+        calculateRoute();
+    </script>
+</body>
+</html>
